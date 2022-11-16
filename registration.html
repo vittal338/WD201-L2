@@ -1,0 +1,136 @@
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- <script src="https://cdn.tailwindcss.com"></script> -->
+    <title>Document</title>
+    <style>
+        input#name:invalid:focus {
+            border: 4px solid rgb(255, 0, 0);
+        }
+
+        input#email:invalid:focus {
+            border: 4px solid rgb(255, 0, 0);
+        }
+    </style>
+</head>
+
+<body>
+
+    <h2>Registration From</h2>
+    <form id="userData">
+
+        <label for="name">Name</label>
+        <input required type="text" id="name" name="name" placeholder="Enter full name" required><br />
+
+        <label for="email">Email</label>
+        <input required type="email" id="email" name="email" placeholder="Enter email"><br />
+
+        <label for="password">Password</label>
+        <input required type="password" id="password" name="password" placeholder="Enter password"><br />
+
+        <label for="dob" min="18" max="55">Date of Birth</label>
+        <input required type="date" id="dob" name="dob"><br />
+
+        <label for="acceptTerms">Accept our Terms & Conditions</label>
+        <input required type="checkbox" name="acceptTerms" id="acceptTerms">
+
+        <button type="submit" id="submit">Submit</button>
+
+    </form>
+
+    <h2>Entries</h2>
+    <div id="user-entries"></div>
+</body>
+<script>
+    const email = document.getElementById('email');
+    email.addEventListener('input', () => validate(email));
+    const submit = document.getElementById('submit')
+    submit.addEventListener('click', () => validate(email))
+    function validate(element) {
+        if (element.validity.typeMismatch) {
+            element.setCustomValidity("The Email is not the right format");
+            element.reportValidity();
+        } else {
+            element.setCustomValidity('');
+        }
+    }
+</script>
+<script>
+    let userData = document.getElementById('userData')
+userEntries=[]
+
+const fetchData = () => {
+    let x = localStorage.getItem('user-entries')
+    if (x) {
+        x=JSON.parse(x)
+    } else {
+        x = []
+    }
+    return x
+}
+
+let tabulateEntries = () => {
+    let fetchedData = fetchData()
+    const tableEntries = fetchedData.map((entry) => {
+        const nameitem = `<td>${entry.name}</td>`//this is called string interpolation
+        const emailitem = `<td>${entry.email}</td>`
+        const passworditem = `<td>${entry.password}</td>`
+        const dobitem = `<td>${entry.dob}</td>`
+        const termsAcceptitem = `<td>${entry.termsAccepted}</td>`
+
+        const row = `<tr>${nameitem} ${emailitem} ${passworditem} ${dobitem} ${termsAcceptitem}</tr>`
+        return row
+    }).join('\n')
+
+    const table = `<table>
+        <tr>
+        <th>Name</th>
+        <th>Email</th>
+        <th>Password</th>
+        <th>Dob</th>
+        <th>Accepted terms?</th>
+        </tr>${tableEntries}
+    </table>`
+
+    document.getElementById('user-entries').innerHTML = table
+}
+
+const savingData = (event) => {
+    event.preventDefault()
+    const name = document.getElementById('name').value
+    const email = document.getElementById('email').value
+    const password = document.getElementById('password').value
+    const dob = document.getElementById('dob').value
+
+    const termsAccepted = document.getElementById('acceptTerms').checked
+
+    presentYear = new Date().getFullYear()
+    userYear = dob.split('-')[0]
+    userAge=presentYear-userYear
+    if(userAge<18||userAge>55){
+        document.getElementById('dob').style='border:1px solid red'
+  return  alert("Sorry! User age must be between 18 to 55")
+    }else{
+        const enteringData = {
+            name, email, password, dob, termsAccepted
+        }
+        userEntries = fetchData()
+        userEntries.push(enteringData)
+    
+        localStorage.setItem('user-entries', JSON.stringify(userEntries))
+        tabulateEntries()
+        userData.reset()
+    }
+}
+userData.addEventListener('submit', savingData)
+tabulateEntries()
+
+
+</script>
+
+</html>
